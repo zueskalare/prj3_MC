@@ -37,6 +37,6 @@ dump 2 1 custom 100 ${ofile}.z.center.dump id type x y z vx vy vz c_1[1] c_1[2] 
 # fix 
 
 fix 1 all nvt temp 1 1 0.1 
-fix defrom all deform 1 z erate -0.01 units box remap x
+fix deform all deform 1 z erate -0.01 units box remap x
 
 run 75000
