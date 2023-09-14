@@ -1,0 +1,42 @@
+# lammps file use modified bond and diehedral style
+
+units  metal
+atom_style full 
+dimension 3
+boundary p s s
+neighbor 5.5 bin
+
+bond_style morsetri
+angle_style none
+dihedral_style harmonic
+read_data ${file}.dat #/media/zues/Jie/prj3/spinodal_model_dat/0.0_0.0_0.0_10.stl.dat #${file}
+pair_style lj/cut 12.5
+pair_coeff *  * 1.0 1.0
+# pair_style none
+
+# system initial 
+
+# velocity all create 1 123454
+
+region center block 10 390 10 390 10 390 units box
+group 1 region center
+comm_modify vel yes
+thermo 1000
+
+
+compute 1 all stress/atom NULL #xx yy zz xy xz yz
+compute b all stress/atom NULL bond
+compute d all stress/atom NULL dihedral
+
+# compute s 1 reduce  sum c_1[1]
+thermo_style custom step etotal pe temp ebond edihed  lx ly lz  
+
+# run
+dump 1 all custom 100 ${ofile}.x.dump id type x y z vx vy vz c_1[1] c_1[2] c_1[3] c_1[4] c_1[5] c_1[6] c_b[1] c_b[2] c_b[3] c_b[4] c_b[5] c_b[6] c_d[1] c_d[2] c_d[3] c_d[4] c_d[5] c_d[6]
+dump 2 1 custom 100 ${ofile}.x.center.dump id type x y z vx vy vz c_1[1] c_1[2] c_1[3] c_1[4] c_1[5] c_1[6] c_b[1] c_b[2] c_b[3] c_b[4] c_b[5] c_b[6] c_d[1] c_d[2] c_d[3] c_d[4] c_d[5] c_d[6]
+# fix 
+
+fix 1 all nvt temp 1 1 0.1 
+fix defrom all deform 1 x erate -0.01 units box remap x
+
+run 75000
