@@ -1,9 +1,11 @@
+# this is test for test like loop 
+
 # lammps file use modified bond and diehedral style
 
 units  metal
 atom_style full 
 dimension 3
-boundary s p s
+boundary p s s
 neighbor 5.5 bin
 
 bond_style morsetri
@@ -32,19 +34,20 @@ compute d all stress/atom NULL dihedral
 thermo_style custom step etotal pe temp ebond edihed  lx ly lz  
 
 # run
-dump 1 all custom 100 ${ofile}.y.comp.dump id type x y z vx vy vz c_1[1] c_1[2] c_1[3] c_1[4] c_1[5] c_1[6] c_b[1] c_b[2] c_b[3] c_b[4] c_b[5] c_b[6] c_d[1] c_d[2] c_d[3] c_d[4] c_d[5] c_d[6]
-dump 2 1 custom 100 ${ofile}.y.comp.center.dump id type x y z vx vy vz c_1[1] c_1[2] c_1[3] c_1[4] c_1[5] c_1[6] c_b[1] c_b[2] c_b[3] c_b[4] c_b[5] c_b[6] c_d[1] c_d[2] c_d[3] c_d[4] c_d[5] c_d[6]
+#dump 1 all custom 100 ${ofile}.x.dump id type x y z vx vy vz c_1[1] c_1[2] c_1[3] c_1[4] c_1[5] c_1[6] c_b[1] c_b[2] c_b[3] c_b[4] c_b[5] c_b[6] c_d[1] c_d[2] c_d[3] c_d[4] c_d[5] c_d[6]
+#dump 2 1 custom 100 ${ofile}.x.center.dump id type x y z vx vy vz c_1[1] c_1[2] c_1[3] c_1[4] c_1[5] c_1[6] c_b[1] c_b[2] c_b[3] c_b[4] c_b[5] c_b[6] c_d[1] c_d[2] c_d[3] c_d[4] c_d[5] c_d[6]
 # fix 
+#dump m1 all movie 1000 movie.avi type type size 640 480
+
+
 
 fix 1 all nvt temp 1 1 0.1 
-fix deform all deform 1 y erate -0.01 units box remap x
-
-
-shell mkdir  ${ofile}
+fix defrom all deform 1 x erate -0.01 units box remap x
 
 variable i loop ${comp}
 label loop
 run 1000
-write_data ${ofile}/y.comp.load.${i}.dat
+write_data ${ofile}.x.${i}.dat
 next i
 jump SELF loop
+

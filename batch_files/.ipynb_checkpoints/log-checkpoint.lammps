@@ -1,0 +1,551 @@
+LAMMPS (3 Nov 2022)
+OMP_NUM_THREADS environment is not set. Defaulting to 1 thread. (src/comm.cpp:98)
+  using 1 OpenMP thread(s) per MPI task
+# lammps file use modified bond and diehedral style
+
+units  metal
+atom_style full
+dimension 3
+boundary s s p
+neighbor 5.5 bin
+
+bond_style morsetri
+angle_style none
+dihedral_style harmonic
+read_data ${file}.dat #/media/zues/Jie/prj3/spinodal_model_dat/0.0_0.0_0.0_10.stl.dat #${file}
+read_data /home/jt35560/codebase/prj3/spinodal_model_dat_0.8/0.00_0.30_0.00_5.dat 
+Reading data file ...
+  triclinic box = (0 0 0) to (400 400 400) with tilt (0 0 0)
+  4 by 4 by 4 MPI processor grid
+  reading atoms ...
+  20000 atoms
+  scanning bonds ...
+  8 = max bonds/atom
+  scanning dihedrals ...
+  8 = max dihedrals/atom
+  reading bonds ...
+  58738 bonds
+  reading dihedrals ...
+  57479 dihedrals
+Finding 1-2 1-3 1-4 neighbors ...
+  special bond factors lj:    0        0        0       
+  special bond factors coul:  0        0        0       
+     9 = max # of 1-2 neighbors
+    40 = max # of 1-3 neighbors
+   240 = max # of 1-4 neighbors
+    49 = max # of special neighbors
+  special bonds CPU = 0.008 seconds
+  read_data CPU = 0.957 seconds
+pair_style lj/cut 12.5
+pair_coeff *  * 1.0 1.0
+# pair_style none
+
+# system initial
+
+# velocity all create 1 123454
+
+region center block 10 390 10 390 10 390 units box
+group 1 region center
+17264 atoms in group 1
+comm_modify vel yes
+thermo 1000
+
+
+compute 1 all stress/atom NULL  #xx yy zz xy xz yz
+compute b all stress/atom NULL bond
+compute d all stress/atom NULL dihedral
+
+# compute s 1 reduce  sum c_1[1]
+thermo_style custom step etotal pe temp ebond edihed  lx ly lz
+
+# run
+dump 1 all custom 100 ${ofile}.z.${comp}.relax.dump id type x y z vx vy vz c_1[1] c_1[2] c_1[3] c_1[4] c_1[5] c_1[6] c_b[1] c_b[2] c_b[3] c_b[4] c_b[5] c_b[6] c_d[1] c_d[2] c_d[3] c_d[4] c_d[5] c_d[6]
+dump 1 all custom 100 /scratch/jt35560/codebase/prj3/spinodal_model_dat_0.8/test_load_unload/0.00_0.30_0.00_5.z.${comp}.relax.dump id type x y z vx vy vz c_1[1] c_1[2] c_1[3] c_1[4] c_1[5] c_1[6] c_b[1] c_b[2] c_b[3] c_b[4] c_b[5] c_b[6] c_d[1] c_d[2] c_d[3] c_d[4] c_d[5] c_d[6]
+dump 1 all custom 100 /scratch/jt35560/codebase/prj3/spinodal_model_dat_0.8/test_load_unload/0.00_0.30_0.00_5.z.10.relax.dump id type x y z vx vy vz c_1[1] c_1[2] c_1[3] c_1[4] c_1[5] c_1[6] c_b[1] c_b[2] c_b[3] c_b[4] c_b[5] c_b[6] c_d[1] c_d[2] c_d[3] c_d[4] c_d[5] c_d[6]
+dump 2 1 custom 100 ${ofile}.z.${comp}.center.relax.dump id type x y z vx vy vz c_1[1] c_1[2] c_1[3] c_1[4] c_1[5] c_1[6] c_b[1] c_b[2] c_b[3] c_b[4] c_b[5] c_b[6] c_d[1] c_d[2] c_d[3] c_d[4] c_d[5] c_d[6]
+dump 2 1 custom 100 /scratch/jt35560/codebase/prj3/spinodal_model_dat_0.8/test_load_unload/0.00_0.30_0.00_5.z.${comp}.center.relax.dump id type x y z vx vy vz c_1[1] c_1[2] c_1[3] c_1[4] c_1[5] c_1[6] c_b[1] c_b[2] c_b[3] c_b[4] c_b[5] c_b[6] c_d[1] c_d[2] c_d[3] c_d[4] c_d[5] c_d[6]
+dump 2 1 custom 100 /scratch/jt35560/codebase/prj3/spinodal_model_dat_0.8/test_load_unload/0.00_0.30_0.00_5.z.10.center.relax.dump id type x y z vx vy vz c_1[1] c_1[2] c_1[3] c_1[4] c_1[5] c_1[6] c_b[1] c_b[2] c_b[3] c_b[4] c_b[5] c_b[6] c_d[1] c_d[2] c_d[3] c_d[4] c_d[5] c_d[6]
+# fix
+
+fix 1 all nvt temp 1 1 0.1
+fix deform all deform 1 z erate -0.01 units box remap x
+
+
+shell mkdir  ${ofile}
+shell mkdir  /scratch/jt35560/codebase/prj3/spinodal_model_dat_0.8/test_load_unload/0.00_0.30_0.00_5
+
+variable i loop ${comp}
+variable i loop 10
+label loopl
+run 1000
+Generated 0 of 0 mixed pair_coeff terms from geometric mixing rule
+Neighbor list info ...
+  update: every = 1 steps, delay = 0 steps, check = yes
+  max neighbors/atom: 2000, page size: 100000
+  master list distance cutoff = 18
+  ghost atom cutoff = 18
+  binsize = 9, bins = 45 45 45
+  1 neighbor lists, perpetual/occasional/extra = 1 0 0
+  (1) pair lj/cut, perpetual
+      attributes: half, newton on
+      pair build: half/bin/newton/tri
+      stencil: half/bin/3d/tri
+      bin: standard
+Per MPI rank memory allocation (min/avg/max) = 20.33 | 20.37 | 20.7 Mbytes
+   Step         TotEng         PotEng          Temp          E_bond        E_dihed           Lx             Ly             Lz      
+         0   32.30999       32.30999       0              1.5920916e-22  32.31197       396.71129      399.62135      400          
+      1000   55.826348      42.50883       5.151698       9.9308441      32.588574      396.97536      400.12443      396          
+Loop time of 3.7646 on 64 procs for 1000 steps with 20000 atoms
+
+Performance: 22.951 ns/day, 1.046 hours/ns, 265.632 timesteps/s, 5.313 Matom-step/s
+98.3% CPU use with 64 MPI tasks x 1 OpenMP threads
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 0.00064537 | 0.001003   | 0.002792   |   1.3 |  0.03
+Bond    | 0.095069   | 0.13231    | 0.22514    |   9.6 |  3.51
+Neigh   | 0.00044527 | 0.00062783 | 0.00081021 |   0.0 |  0.02
+Comm    | 0.146      | 0.27291    | 0.35492    |   9.6 |  7.25
+Output  | 2.155      | 3.1414     | 3.2761     |  17.9 | 83.45
+Modify  | 0.019107   | 0.073046   | 0.22935    |  21.6 |  1.94
+Other   |            | 0.1433     |            |       |  3.81
+
+Nlocal:          312.5 ave         489 max         234 min
+Histogram: 27 5 5 6 4 2 4 5 2 4
+Nghost:        359.344 ave         645 max         144 min
+Histogram: 6 8 5 10 11 8 4 7 3 2
+Neighs:        40.4531 ave         426 max           0 min
+Histogram: 52 3 0 1 2 1 3 0 0 2
+
+Total # of neighbors = 2589
+Ave neighs/atom = 0.12945
+Ave special neighs/atom = 35.6961
+Neighbor list builds = 1
+Dangerous builds = 0
+write_data ${ofile}/z.${comp}.load.${i}.dat
+write_data /scratch/jt35560/codebase/prj3/spinodal_model_dat_0.8/test_load_unload/0.00_0.30_0.00_5/z.${comp}.load.${i}.dat
+write_data /scratch/jt35560/codebase/prj3/spinodal_model_dat_0.8/test_load_unload/0.00_0.30_0.00_5/z.10.load.${i}.dat
+write_data /scratch/jt35560/codebase/prj3/spinodal_model_dat_0.8/test_load_unload/0.00_0.30_0.00_5/z.10.load.1.dat
+System init for write_data ...
+Generated 0 of 0 mixed pair_coeff terms from geometric mixing rule
+next i
+jump SELF loopl
+run 1000
+Generated 0 of 0 mixed pair_coeff terms from geometric mixing rule
+Per MPI rank memory allocation (min/avg/max) = 20.33 | 20.37 | 20.7 Mbytes
+   Step         TotEng         PotEng          Temp          E_bond        E_dihed           Lx             Ly             Lz      
+      1000   55.975424      42.657906      5.151698       10.079884      32.588611      397.05131      400.4914       396          
+      2000   63.849594      51.299372      4.8548797      13.770325      37.552225      397.3407       401.43218      392.04       
+Loop time of 0.711309 on 64 procs for 1000 steps with 20000 atoms
+
+Performance: 121.466 ns/day, 0.198 hours/ns, 1405.859 timesteps/s, 28.117 Matom-step/s
+99.3% CPU use with 64 MPI tasks x 1 OpenMP threads
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 0.00063704 | 0.001088   | 0.0033184  |   1.7 |  0.15
+Bond    | 0.096568   | 0.13223    | 0.23068    |   9.6 | 18.59
+Neigh   | 0.00090595 | 0.0012357  | 0.0015713  |   0.5 |  0.17
+Comm    | 0.15041    | 0.28659    | 0.36833    |  10.1 | 40.29
+Output  | 0.159      | 0.18391    | 0.20881    |   3.4 | 25.85
+Modify  | 0.022978   | 0.072808   | 0.23826    |  22.2 | 10.24
+Other   |            | 0.03345    |            |       |  4.70
+
+Nlocal:          312.5 ave         489 max         232 min
+Histogram: 24 10 4 5 3 4 2 6 3 3
+Nghost:        366.828 ave         662 max         145 min
+Histogram: 6 8 8 8 10 10 3 7 2 2
+Neighs:         69.125 ave         469 max           0 min
+Histogram: 43 4 4 3 3 2 1 2 0 2
+
+Total # of neighbors = 4424
+Ave neighs/atom = 0.2212
+Ave special neighs/atom = 35.6961
+Neighbor list builds = 2
+Dangerous builds = 0
+write_data ${ofile}/z.${comp}.load.${i}.dat
+write_data /scratch/jt35560/codebase/prj3/spinodal_model_dat_0.8/test_load_unload/0.00_0.30_0.00_5/z.${comp}.load.${i}.dat
+write_data /scratch/jt35560/codebase/prj3/spinodal_model_dat_0.8/test_load_unload/0.00_0.30_0.00_5/z.10.load.${i}.dat
+write_data /scratch/jt35560/codebase/prj3/spinodal_model_dat_0.8/test_load_unload/0.00_0.30_0.00_5/z.10.load.2.dat
+System init for write_data ...
+Generated 0 of 0 mixed pair_coeff terms from geometric mixing rule
+next i
+jump SELF loopl
+run 1000
+Generated 0 of 0 mixed pair_coeff terms from geometric mixing rule
+Per MPI rank memory allocation (min/avg/max) = 20.33 | 20.38 | 20.7 Mbytes
+   Step         TotEng         PotEng          Temp          E_bond        E_dihed           Lx             Ly             Lz      
+      2000   64.016104      51.465882      4.8548797      13.936742      37.552318      397.36035      401.5162       392.04       
+      3000   75.266643      64.65956       4.1032035      14.249477      50.445726      397.61167      402.79307      388.1196     
+Loop time of 0.794596 on 64 procs for 1000 steps with 20000 atoms
+
+Performance: 108.735 ns/day, 0.221 hours/ns, 1258.502 timesteps/s, 25.170 Matom-step/s
+99.4% CPU use with 64 MPI tasks x 1 OpenMP threads
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 0.00063098 | 0.0012328  | 0.0040545  |   2.0 |  0.16
+Bond    | 0.093781   | 0.13239    | 0.23669    |   9.8 | 16.66
+Neigh   | 0.00092303 | 0.0013251  | 0.0019303  |   0.7 |  0.17
+Comm    | 0.16858    | 0.31713    | 0.40044    |  10.2 | 39.91
+Output  | 0.17644    | 0.20869    | 0.24079    |   4.2 | 26.26
+Modify  | 0.020639   | 0.09221    | 0.27063    |  21.5 | 11.60
+Other   |            | 0.04162    |            |       |  5.24
+
+Nlocal:          312.5 ave         493 max         234 min
+Histogram: 27 8 3 6 2 5 2 4 5 2
+Nghost:        372.688 ave         686 max         145 min
+Histogram: 7 5 11 7 10 10 4 5 4 1
+Neighs:        94.7031 ave         652 max           0 min
+Histogram: 43 4 4 3 4 1 2 1 0 2
+
+Total # of neighbors = 6061
+Ave neighs/atom = 0.30305
+Ave special neighs/atom = 35.6961
+Neighbor list builds = 2
+Dangerous builds = 0
+write_data ${ofile}/z.${comp}.load.${i}.dat
+write_data /scratch/jt35560/codebase/prj3/spinodal_model_dat_0.8/test_load_unload/0.00_0.30_0.00_5/z.${comp}.load.${i}.dat
+write_data /scratch/jt35560/codebase/prj3/spinodal_model_dat_0.8/test_load_unload/0.00_0.30_0.00_5/z.10.load.${i}.dat
+write_data /scratch/jt35560/codebase/prj3/spinodal_model_dat_0.8/test_load_unload/0.00_0.30_0.00_5/z.10.load.3.dat
+System init for write_data ...
+Generated 0 of 0 mixed pair_coeff terms from geometric mixing rule
+next i
+jump SELF loopl
+run 1000
+Generated 0 of 0 mixed pair_coeff terms from geometric mixing rule
+Per MPI rank memory allocation (min/avg/max) = 20.33 | 20.39 | 20.7 Mbytes
+   Step         TotEng         PotEng          Temp          E_bond        E_dihed           Lx             Ly             Lz      
+      3000   75.421441      64.814358      4.1032035      14.404022      50.445978      397.62899      402.8866       388.1196     
+      4000   91.459115      82.697485      3.3893156      13.48017       69.265256      397.83362      404.25547      384.2384     
+Loop time of 0.753369 on 64 procs for 1000 steps with 20000 atoms
+
+Performance: 114.685 ns/day, 0.209 hours/ns, 1327.371 timesteps/s, 26.547 Matom-step/s
+99.3% CPU use with 64 MPI tasks x 1 OpenMP threads
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 0.00062879 | 0.0013503  | 0.0046857  |   2.4 |  0.18
+Bond    | 0.094651   | 0.13258    | 0.23687    |   9.8 | 17.60
+Neigh   | 0.00093473 | 0.0012482  | 0.0016818  |   0.5 |  0.17
+Comm    | 0.15073    | 0.3062     | 0.39075    |  10.9 | 40.64
+Output  | 0.16613    | 0.19363    | 0.22069    |   3.7 | 25.70
+Modify  | 0.022414   | 0.082409   | 0.26523    |  23.3 | 10.94
+Other   |            | 0.03595    |            |       |  4.77
+
+Nlocal:          312.5 ave         493 max         231 min
+Histogram: 26 8 2 6 4 6 1 4 5 2
+Nghost:        378.078 ave         694 max         144 min
+Histogram: 6 6 9 9 9 10 6 5 3 1
+Neighs:        122.766 ave         866 max           0 min
+Histogram: 43 5 3 4 2 2 2 1 1 1
+
+Total # of neighbors = 7857
+Ave neighs/atom = 0.39285
+Ave special neighs/atom = 35.6961
+Neighbor list builds = 2
+Dangerous builds = 0
+write_data ${ofile}/z.${comp}.load.${i}.dat
+write_data /scratch/jt35560/codebase/prj3/spinodal_model_dat_0.8/test_load_unload/0.00_0.30_0.00_5/z.${comp}.load.${i}.dat
+write_data /scratch/jt35560/codebase/prj3/spinodal_model_dat_0.8/test_load_unload/0.00_0.30_0.00_5/z.10.load.${i}.dat
+write_data /scratch/jt35560/codebase/prj3/spinodal_model_dat_0.8/test_load_unload/0.00_0.30_0.00_5/z.10.load.4.dat
+System init for write_data ...
+Generated 0 of 0 mixed pair_coeff terms from geometric mixing rule
+next i
+jump SELF loopl
+run 1000
+Generated 0 of 0 mixed pair_coeff terms from geometric mixing rule
+Per MPI rank memory allocation (min/avg/max) = 20.33 | 20.39 | 20.7 Mbytes
+   Step         TotEng         PotEng          Temp          E_bond        E_dihed           Lx             Ly             Lz      
+      4000   91.591457      82.829827      3.3893156      13.612029      69.26574       397.83773      404.29941      384.2384     
+      5000   111.65094      104.21229      2.8775407      13.35417       90.917531      397.9376       404.9973       380.39602    
+Loop time of 0.791054 on 64 procs for 1000 steps with 20000 atoms
+
+Performance: 109.221 ns/day, 0.220 hours/ns, 1264.136 timesteps/s, 25.283 Matom-step/s
+99.4% CPU use with 64 MPI tasks x 1 OpenMP threads
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 0.00063067 | 0.0014839  | 0.0055798  |   2.9 |  0.19
+Bond    | 0.094204   | 0.13294    | 0.23851    |   9.9 | 16.81
+Neigh   | 0.00042487 | 0.00060279 | 0.00084866 |   0.0 |  0.08
+Comm    | 0.1724     | 0.32614    | 0.4062     |  10.5 | 41.23
+Output  | 0.17794    | 0.21017    | 0.2418     |   4.2 | 26.57
+Modify  | 0.025992   | 0.07912    | 0.26085    |  23.6 | 10.00
+Other   |            | 0.0406     |            |       |  5.13
+
+Nlocal:          312.5 ave         489 max         230 min
+Histogram: 25 7 4 6 3 6 4 2 5 2
+Nghost:        380.047 ave         693 max         144 min
+Histogram: 6 6 9 9 10 7 7 6 3 1
+Neighs:        136.906 ave         959 max           0 min
+Histogram: 43 3 4 4 3 3 1 1 1 1
+
+Total # of neighbors = 8762
+Ave neighs/atom = 0.4381
+Ave special neighs/atom = 35.6961
+Neighbor list builds = 1
+Dangerous builds = 0
+write_data ${ofile}/z.${comp}.load.${i}.dat
+write_data /scratch/jt35560/codebase/prj3/spinodal_model_dat_0.8/test_load_unload/0.00_0.30_0.00_5/z.${comp}.load.${i}.dat
+write_data /scratch/jt35560/codebase/prj3/spinodal_model_dat_0.8/test_load_unload/0.00_0.30_0.00_5/z.10.load.${i}.dat
+write_data /scratch/jt35560/codebase/prj3/spinodal_model_dat_0.8/test_load_unload/0.00_0.30_0.00_5/z.10.load.5.dat
+System init for write_data ...
+Generated 0 of 0 mixed pair_coeff terms from geometric mixing rule
+next i
+jump SELF loopl
+run 1000
+Generated 0 of 0 mixed pair_coeff terms from geometric mixing rule
+Per MPI rank memory allocation (min/avg/max) = 20.33 | 20.39 | 20.72 Mbytes
+   Step         TotEng         PotEng          Temp          E_bond        E_dihed           Lx             Ly             Lz      
+      5000   111.76578      104.32713      2.8775407      13.468265      90.918277      398.02881      405.66219      380.39602    
+      6000   132.45899      125.72785      2.6038456      13.789597      112.01246      398.12058      406.29991      376.59206    
+Loop time of 0.757346 on 64 procs for 1000 steps with 20000 atoms
+
+Performance: 114.083 ns/day, 0.210 hours/ns, 1320.401 timesteps/s, 26.408 Matom-step/s
+99.4% CPU use with 64 MPI tasks x 1 OpenMP threads
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 0.00061704 | 0.0015762  | 0.0057187  |   3.1 |  0.21
+Bond    | 0.094054   | 0.13292    | 0.23806    |  10.1 | 17.55
+Neigh   | 0.00047047 | 0.00066047 | 0.00090384 |   0.0 |  0.09
+Comm    | 0.13416    | 0.28488    | 0.36779    |  10.8 | 37.61
+Output  | 0.17608    | 0.20715    | 0.23704    |   4.0 | 27.35
+Modify  | 0.0236     | 0.091177   | 0.26667    |  21.2 | 12.04
+Other   |            | 0.03899    |            |       |  5.15
+
+Nlocal:          312.5 ave         490 max         227 min
+Histogram: 23 9 4 6 3 5 4 2 5 3
+Nghost:        384.891 ave         691 max         147 min
+Histogram: 6 6 9 9 9 7 6 7 3 2
+Neighs:        162.031 ave        1012 max           0 min
+Histogram: 42 3 5 3 1 5 2 0 2 1
+
+Total # of neighbors = 10370
+Ave neighs/atom = 0.5185
+Ave special neighs/atom = 35.6961
+Neighbor list builds = 1
+Dangerous builds = 0
+write_data ${ofile}/z.${comp}.load.${i}.dat
+write_data /scratch/jt35560/codebase/prj3/spinodal_model_dat_0.8/test_load_unload/0.00_0.30_0.00_5/z.${comp}.load.${i}.dat
+write_data /scratch/jt35560/codebase/prj3/spinodal_model_dat_0.8/test_load_unload/0.00_0.30_0.00_5/z.10.load.${i}.dat
+write_data /scratch/jt35560/codebase/prj3/spinodal_model_dat_0.8/test_load_unload/0.00_0.30_0.00_5/z.10.load.6.dat
+System init for write_data ...
+Generated 0 of 0 mixed pair_coeff terms from geometric mixing rule
+next i
+jump SELF loopl
+run 1000
+Generated 0 of 0 mixed pair_coeff terms from geometric mixing rule
+Per MPI rank memory allocation (min/avg/max) = 20.33 | 20.39 | 20.72 Mbytes
+   Step         TotEng         PotEng          Temp          E_bond        E_dihed           Lx             Ly             Lz      
+      6000   132.56228      125.83115      2.6038456      13.891904      112.01345      398.19634      406.83759      376.59206    
+      7000   152.62621      146.46961      2.3815936      14.51905       132.04625      398.28263      407.4127       372.82614    
+Loop time of 0.661606 on 64 procs for 1000 steps with 20000 atoms
+
+Performance: 130.591 ns/day, 0.184 hours/ns, 1511.474 timesteps/s, 30.229 Matom-step/s
+99.4% CPU use with 64 MPI tasks x 1 OpenMP threads
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 0.00061464 | 0.001662   | 0.0063915  |   3.4 |  0.25
+Bond    | 0.094027   | 0.1329     | 0.23786    |  10.1 | 20.09
+Neigh   | 0.00044888 | 0.00057499 | 0.00064237 |   0.0 |  0.09
+Comm    | 0.10877    | 0.24052    | 0.31806    |  11.1 | 36.35
+Output  | 0.14954    | 0.1751     | 0.20127    |   3.7 | 26.47
+Modify  | 0.020608   | 0.076498   | 0.23328    |  21.5 | 11.56
+Other   |            | 0.03436    |            |       |  5.19
+
+Nlocal:          312.5 ave         486 max         225 min
+Histogram: 19 13 4 5 4 5 4 1 6 3
+Nghost:        388.422 ave         684 max         147 min
+Histogram: 6 6 8 8 11 6 5 8 4 2
+Neighs:        184.547 ave        1201 max           0 min
+Histogram: 42 4 4 3 2 4 2 0 2 1
+
+Total # of neighbors = 11811
+Ave neighs/atom = 0.59055
+Ave special neighs/atom = 35.6961
+Neighbor list builds = 1
+Dangerous builds = 0
+write_data ${ofile}/z.${comp}.load.${i}.dat
+write_data /scratch/jt35560/codebase/prj3/spinodal_model_dat_0.8/test_load_unload/0.00_0.30_0.00_5/z.${comp}.load.${i}.dat
+write_data /scratch/jt35560/codebase/prj3/spinodal_model_dat_0.8/test_load_unload/0.00_0.30_0.00_5/z.10.load.${i}.dat
+write_data /scratch/jt35560/codebase/prj3/spinodal_model_dat_0.8/test_load_unload/0.00_0.30_0.00_5/z.10.load.7.dat
+System init for write_data ...
+Generated 0 of 0 mixed pair_coeff terms from geometric mixing rule
+next i
+jump SELF loopl
+run 1000
+Generated 0 of 0 mixed pair_coeff terms from geometric mixing rule
+Per MPI rank memory allocation (min/avg/max) = 20.33 | 20.39 | 20.72 Mbytes
+   Step         TotEng         PotEng          Temp          E_bond        E_dihed           Lx             Ly             Lz      
+      7000   152.72012      146.56352      2.3815936      14.611755      132.04745      398.35626      407.87876      372.82614    
+      8000   171.35047      165.54691      2.2450267      15.527502      151.18444      398.44436      408.38486      369.09788    
+Loop time of 0.693185 on 64 procs for 1000 steps with 20000 atoms
+
+Performance: 124.642 ns/day, 0.193 hours/ns, 1442.616 timesteps/s, 28.852 Matom-step/s
+99.3% CPU use with 64 MPI tasks x 1 OpenMP threads
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 0.00061976 | 0.0017641  | 0.0070989  |   3.7 |  0.25
+Bond    | 0.09477    | 0.13315    | 0.23538    |  10.1 | 19.21
+Neigh   | 0.00044864 | 0.00055345 | 0.00074208 |   0.0 |  0.08
+Comm    | 0.13534    | 0.27944    | 0.35906    |  10.9 | 40.31
+Output  | 0.15065    | 0.17363    | 0.1964     |   3.3 | 25.05
+Modify  | 0.017933   | 0.073511   | 0.24152    |  23.3 | 10.60
+Other   |            | 0.03113    |            |       |  4.49
+
+Nlocal:          312.5 ave         485 max         224 min
+Histogram: 19 12 5 4 5 6 3 2 4 4
+Nghost:        391.859 ave         675 max         145 min
+Histogram: 4 8 7 9 8 9 3 10 4 2
+Neighs:        204.688 ave        1310 max           0 min
+Histogram: 41 4 5 3 2 4 2 0 2 1
+
+Total # of neighbors = 13100
+Ave neighs/atom = 0.655
+Ave special neighs/atom = 35.6961
+Neighbor list builds = 1
+Dangerous builds = 0
+write_data ${ofile}/z.${comp}.load.${i}.dat
+write_data /scratch/jt35560/codebase/prj3/spinodal_model_dat_0.8/test_load_unload/0.00_0.30_0.00_5/z.${comp}.load.${i}.dat
+write_data /scratch/jt35560/codebase/prj3/spinodal_model_dat_0.8/test_load_unload/0.00_0.30_0.00_5/z.10.load.${i}.dat
+write_data /scratch/jt35560/codebase/prj3/spinodal_model_dat_0.8/test_load_unload/0.00_0.30_0.00_5/z.10.load.8.dat
+System init for write_data ...
+Generated 0 of 0 mixed pair_coeff terms from geometric mixing rule
+next i
+jump SELF loopl
+run 1000
+Generated 0 of 0 mixed pair_coeff terms from geometric mixing rule
+Per MPI rank memory allocation (min/avg/max) = 20.33 | 20.39 | 20.72 Mbytes
+   Step         TotEng         PotEng          Temp          E_bond        E_dihed           Lx             Ly             Lz      
+      8000   171.43719      165.63363      2.2450267      15.612817      151.18584      398.51145      408.90663      369.09788    
+      9000   188.33767      182.92874      2.0923685      16.761602      171.59277      398.63408      409.99985      365.4069     
+Loop time of 0.81141 on 64 procs for 1000 steps with 20000 atoms
+
+Performance: 106.481 ns/day, 0.225 hours/ns, 1232.423 timesteps/s, 24.648 Matom-step/s
+99.3% CPU use with 64 MPI tasks x 1 OpenMP threads
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 0.00061412 | 0.0018784  | 0.0074868  |   3.9 |  0.23
+Bond    | 0.094547   | 0.1333     | 0.23639    |  10.0 | 16.43
+Neigh   | 0.00099793 | 0.0014164  | 0.0019064  |   0.6 |  0.17
+Comm    | 0.17023    | 0.34538    | 0.43718    |  11.0 | 42.57
+Output  | 0.17071    | 0.20051    | 0.22807    |   3.8 | 24.71
+Modify  | 0.021144   | 0.092154   | 0.29405    |  23.7 | 11.36
+Other   |            | 0.03677    |            |       |  4.53
+
+Nlocal:          312.5 ave         480 max         223 min
+Histogram: 15 13 7 5 3 7 3 4 1 6
+Nghost:        398.062 ave         690 max         147 min
+Histogram: 5 6 9 7 9 9 4 10 3 2
+Neighs:        233.172 ave        1486 max           0 min
+Histogram: 41 5 4 3 3 3 2 0 2 1
+
+Total # of neighbors = 14923
+Ave neighs/atom = 0.74615
+Ave special neighs/atom = 35.6961
+Neighbor list builds = 2
+Dangerous builds = 0
+write_data ${ofile}/z.${comp}.load.${i}.dat
+write_data /scratch/jt35560/codebase/prj3/spinodal_model_dat_0.8/test_load_unload/0.00_0.30_0.00_5/z.${comp}.load.${i}.dat
+write_data /scratch/jt35560/codebase/prj3/spinodal_model_dat_0.8/test_load_unload/0.00_0.30_0.00_5/z.10.load.${i}.dat
+write_data /scratch/jt35560/codebase/prj3/spinodal_model_dat_0.8/test_load_unload/0.00_0.30_0.00_5/z.10.load.9.dat
+System init for write_data ...
+Generated 0 of 0 mixed pair_coeff terms from geometric mixing rule
+next i
+jump SELF loopl
+run 1000
+Generated 0 of 0 mixed pair_coeff terms from geometric mixing rule
+Per MPI rank memory allocation (min/avg/max) = 20.33 | 20.4 | 20.72 Mbytes
+   Step         TotEng         PotEng          Temp          E_bond        E_dihed           Lx             Ly             Lz      
+      9000   188.41914      183.01022      2.0923685      16.841478      171.5944       398.64083      410.06602      365.4069     
+     10000   205.58049      200.44297      1.9873769      17.737291      191.03762      398.74071      411.30135      361.75283    
+Loop time of 0.738381 on 64 procs for 1000 steps with 20000 atoms
+
+Performance: 117.013 ns/day, 0.205 hours/ns, 1354.315 timesteps/s, 27.086 Matom-step/s
+99.4% CPU use with 64 MPI tasks x 1 OpenMP threads
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 0.00060088 | 0.0019584  | 0.0079846  |   4.2 |  0.27
+Bond    | 0.092281   | 0.13323    | 0.23642    |  10.0 | 18.04
+Neigh   | 0.0010189  | 0.0014611  | 0.0018295  |   0.5 |  0.20
+Comm    | 0.13826    | 0.28286    | 0.37348    |  10.5 | 38.31
+Output  | 0.16386    | 0.19162    | 0.21842    |   3.7 | 25.95
+Modify  | 0.017854   | 0.09164    | 0.26332    |  21.0 | 12.41
+Other   |            | 0.03562    |            |       |  4.82
+
+Nlocal:          312.5 ave         474 max         220 min
+Histogram: 13 14 5 6 6 6 3 3 2 6
+Nghost:          402.5 ave         701 max         145 min
+Histogram: 5 4 11 6 10 9 5 9 3 2
+Neighs:        249.484 ave        1504 max           0 min
+Histogram: 41 3 3 5 1 5 3 1 0 2
+
+Total # of neighbors = 15967
+Ave neighs/atom = 0.79835
+Ave special neighs/atom = 35.6961
+Neighbor list builds = 2
+Dangerous builds = 0
+write_data ${ofile}/z.${comp}.load.${i}.dat
+write_data /scratch/jt35560/codebase/prj3/spinodal_model_dat_0.8/test_load_unload/0.00_0.30_0.00_5/z.${comp}.load.${i}.dat
+write_data /scratch/jt35560/codebase/prj3/spinodal_model_dat_0.8/test_load_unload/0.00_0.30_0.00_5/z.10.load.${i}.dat
+write_data /scratch/jt35560/codebase/prj3/spinodal_model_dat_0.8/test_load_unload/0.00_0.30_0.00_5/z.10.load.10.dat
+System init for write_data ...
+Generated 0 of 0 mixed pair_coeff terms from geometric mixing rule
+next i
+jump SELF loopl
+
+unfix deform
+
+variable i loop ${comp}
+variable i loop 10
+label loopu
+run 1000
+Generated 0 of 0 mixed pair_coeff terms from geometric mixing rule
+Per MPI rank memory allocation (min/avg/max) = 20.33 | 20.4 | 20.72 Mbytes
+   Step         TotEng         PotEng          Temp          E_bond        E_dihed           Lx             Ly             Lz      
+     10000   205.65647      200.51895      1.9873769      17.81148       191.03945      398.74768      411.3946       361.75283    
+     11000   169.76772      166.05264      1.4371293      15.706029      160.54832      398.74768      411.3946       361.75283    
+Loop time of 0.685331 on 64 procs for 1000 steps with 20000 atoms
+
+Performance: 126.070 ns/day, 0.190 hours/ns, 1459.149 timesteps/s, 29.183 Matom-step/s
+99.3% CPU use with 64 MPI tasks x 1 OpenMP threads
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 0.00059566 | 0.0019822  | 0.0078675  |   4.2 |  0.29
+Bond    | 0.091508   | 0.13319    | 0.2364     |  10.1 | 19.43
+Neigh   | 0          | 0          | 0          |   0.0 |  0.00
+Comm    | 0.12957    | 0.25896    | 0.34986    |  10.1 | 37.79
+Output  | 0.15112    | 0.17553    | 0.2004     |   3.5 | 25.61
+Modify  | 0.012574   | 0.08433    | 0.23847    |  20.6 | 12.31
+Other   |            | 0.03134    |            |       |  4.57
+
+Nlocal:          312.5 ave         474 max         220 min
+Histogram: 13 14 5 6 6 6 3 3 2 6
+Nghost:        403.047 ave         702 max         145 min
+Histogram: 5 4 11 6 10 9 5 9 3 2
+Neighs:        250.359 ave        1506 max           0 min
+Histogram: 41 3 3 5 1 5 3 1 0 2
+
+Total # of neighbors = 16023
+Ave neighs/atom = 0.80115
+Ave special neighs/atom = 35.6961
+Neighbor list builds = 0
+Dangerous builds = 0
