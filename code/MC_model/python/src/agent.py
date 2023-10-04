@@ -63,7 +63,13 @@ class Spinodal:
     def __call__(self,X:np.ndarray):
         phy = np.sqrt(2/len(self.N)) * np.sum(np.cos(self.beta*np.matmul(self.N,X) + self.gamma))-self.index
         return(phy)
+
+    def matrix_call(self,X:np.ndarray):
+        phy = np.sqrt(2/len(self.N)) * np.sum(np.cos(self.beta*np.matmul(X,self.N.T) + self.gamma),axis=-1)-self.index
+        return phy
+
         
+    
         
         
 

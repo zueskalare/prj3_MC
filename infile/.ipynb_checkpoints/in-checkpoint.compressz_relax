@@ -51,6 +51,9 @@ jump SELF loopl
 
 unfix deform 
 
+
+fix undeform all deform 1 z erate 0.01 units box remap x
+
 variable i loop ${comp}
 label loopu
 run 1000
