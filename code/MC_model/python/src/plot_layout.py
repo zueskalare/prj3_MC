@@ -1,4 +1,4 @@
-
+import numpy as np
 color = dict(
   Grey_to_Red = ["#d7e1ee", "#cbd6e4", "#bfcbdb", "#b3bfd1", "#a4a2a8", "#df8879", "#c86558", "#b04238", "#991f17"],
   Spring_Pastels = ["#fd7f6f", "#7eb0d5", "#b2e061", "#bd7ebe", "#ffb55a", "#ffee65", "#beb9db", "#fdcce5", "#8bd3c7"],
@@ -30,12 +30,36 @@ layout = {
     'y':1.1
     },
   
+  'coloraxis1':dict(
+                    cauto = True,
+                    colorscale='Jet',
+                    # cmin = 0,
+                    # cmax = 1,
+                    colorbar=dict(
+                            title=dict(text='',font_family = "Times New Roman",font_size = 20),
+                            # dtick = 0.2,
+                            tickmode='array', # choose tickmode for color bar array is for customized tick labelss
+                            tickvals=np.linspace(0,1,6),
+                            titleside='right',
+                            tickprefix='<b>',
+                            ticksuffix='</b>',
+                            # tick0 = 1,
+                            tickfont=dict(size=15,family='Times New Roman'),
+                            thickness=20,
+                            len=0.8,
+                            x=0.85, # the location for color bar 
+                            y=0.43,
+                            ),
+                            # colorbar_x=-0.1,
+                            # colorbar_y=0.5
+                    ),
+  
   'coloraxis' :dict(
     colorscale = [[0,color['jianbian'][0][0]],[0.3,color['jianbian'][0][-1]],[0.7,color['jianbian'][2][-1]],[1,color['jianbian'][2][0]]],
     showscale = True,
     colorbar = dict(
       title = dict(
-          text = '<b>Generation',
+          text = '<b></b>',
           font = dict(size= 40),
           side = 'right',
       ),
@@ -60,7 +84,7 @@ layout = {
   # },
   'font_family':'Times New Roman',
   'plot_bgcolor':'#FFFFFF',
-  'paper_bgcolor':'rgba(0,0,0,0)',
+  'paper_bgcolor':'rgba(255,255,255,0)',
   'width':1200,
   'height':1000,
   "title": {"text": None,'font_family':'Times New Roman','font_size':40,'xanchor':None}, 
