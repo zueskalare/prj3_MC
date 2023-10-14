@@ -8,7 +8,7 @@ for root, dirs, files in os.walk('/Volumes/tianjie 1/code/research/prj3/sim_dump
     for _file in files :
         if _file.endswith('.vtk') and  _file[0] != '.':
             file = os.path.join(root, _file)
-
+            # file = '/Volumes/tianjie 1/code/research/prj3/sim_dump/0.50_0.00_0.00_10/y.comp.load.14.140.vtk'
             ori = file.split('/')[-1].split('.')[0]
             ori = str.upper(ori)
             print(ori)
@@ -104,6 +104,7 @@ for root, dirs, files in os.walk('/Volumes/tianjie 1/code/research/prj3/sim_dump
             Render(view)
 
             # Save a screenshot
+            print(file[:-4] + '.png')
             SaveScreenshot(file[:-4] + '.png')
 
             # Optionally, to keep the pvpython session open and inspect the data
@@ -112,5 +113,6 @@ for root, dirs, files in os.walk('/Volumes/tianjie 1/code/research/prj3/sim_dump
             # Delete(GetSources())
 
             ResetSession()
+            # break
             
 os.system(f'echo {fail} > /Volumes/tianjie 1/code/research/prj3/sim_dump/fail.txt')
